@@ -37,7 +37,36 @@ while ($castle = @mysql_fetch_array($sql))
 	if (isset($clan['clan_name'])) $gen .= '<div><strong>Tax Rate:</strong> ' . $castle['taxPercent'] . '%</div>';
 	
 	$gen .= '<div><strong>Next Siege:</strong> ' . date('M d Y h:iA ',$castle['siegeDate']/1000) . ' ' . date('T') . '</div>';
-	$gen .= '</div></div>\';'."\n\n";
+	$gen .= '</div>';
+	
+	// seed
+	
+	$gen .= '<table width="100%" border="0" cellspacing="0" cellpadding="2" id="'.ucfirst(strtolower($castle['name'])).'Seeds" style="margin: 5px; font: 11px Verdana, Arial, Helvetica, sans-serif;">';
+	$gen .= '<tr>';
+	$gen .= '<td style="background-color: #DDD"><strong>Seed Name:</strong></td>';
+	$gen .= '<td style="background-color: #DDD"><strong>Seed Price:</strong></td>';
+	$gen .= '</tr>';
+	
+	$sql2 =	'(SELECT `name`, `seed_price` FROM `etcitem`, `castle_manor_production` WHERE `seed_id` = `item_id` AND `castle_id` = '.$castle['id'].')'
+				.' UNION '.
+			'(SELECT `name`, `c`.`price` FROM `etcitem` e, `castle_manor_procure` c WHERE `crop_id` = `item_id` AND `castle_id` = '.$castle['id'].')'
+				.' ORDER BY `name`;';
+	
+	$req = @mysql_query($sql2);
+	$i = 1;
+	while ($row = mysql_fetch_array($req, MYSQL_NUM)) {
+		$gen .= '<tr>';
+		$gen .= '<td style="background-color: #'.( ($i % 2) ? 'EEE' : 'DDD' ).'">'.$row[0].'</td>';
+		$gen .= '<td style="background-color: #'.( ($i % 2) ? 'EEE' : 'DDD' ).'">'.$row[1].'</td>';
+		$gen .= '</tr>';
+		$i++;
+	}
+	
+	
+	$gen .= '</table>';
+	
+	
+	$gen .= '</div>\';'."\n\n";
 }
 
 $handle = @fopen($filename, 'w+');
@@ -62,7 +91,7 @@ oreninfo = '<div class="castleWrapper">
     <div><strong>Tax Rate:</strong> 15%</div>
     <div><strong>Next Siege:</strong> May 24 2009 03:00PM </div>
   </div>
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" id="OrenSeeds">
+  
     <tr>
       <td><strong>Seed Name:</strong></td>
       <td><strong>Seed Price:</strong></td>
